@@ -16,7 +16,7 @@ object RainfallPrediction extends App{
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("Dataframe6")
+    .appName("RainfallPrediction")
     .getOrCreate()
 
   val testData = sparkSession.read.option("header", "true").option("inferSchema", "true").format("csv").load("weather-test.csv")
