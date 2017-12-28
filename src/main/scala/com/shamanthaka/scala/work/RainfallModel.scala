@@ -10,7 +10,7 @@ import org.apache.spark.sql.functions._
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object RainfallProcess extends App{
+object RainfallModel extends App{
 
   val sparkSession = SparkSession
     .builder()
