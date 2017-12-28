@@ -34,10 +34,6 @@ object RainfallPrediction extends App{
     println("\n")
   }
 
-  /*def dateToLong(d:String): Long = {
-    val format = new java.text.SimpleDateFormat("M/dd/yyyy")
-    format.parse(d).getTime()
-  }*/
 
   import sparkSession.implicits._
 
