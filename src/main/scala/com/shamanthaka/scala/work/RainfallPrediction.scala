@@ -3,8 +3,8 @@ package com.shamanthaka.scala.work
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.ml.feature.{LabeledPoint, OneHotEncoder, StringIndexer, VectorAssembler}
+import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.functions._
 
 /**
@@ -46,6 +46,8 @@ object RainfallPrediction extends App{
 
   val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
   predictionAndLabels.show(100)
+  //.map{case Row(label: Double, features: Vector) => LabeledPoint(label, features)}
+
 
   sparkSession.stop()
 
