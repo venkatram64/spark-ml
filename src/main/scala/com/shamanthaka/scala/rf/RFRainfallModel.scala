@@ -1,4 +1,4 @@
-package com.shamanthaka.scala.work
+package com.shamanthaka.scala.rf
 
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.RandomForestClassifier
@@ -10,12 +10,12 @@ import org.apache.spark.sql.functions._
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object RainfallModel extends App{
+object RFRainfallModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RainfallModel")
+    .appName("RFRainfallModel")
     .getOrCreate()
 
   val data = sparkSession.read.option("header", "true").option("inferSchema", "true").format("csv").load("weather.csv")
@@ -73,7 +73,7 @@ object RainfallModel extends App{
 
   val model = pipeline.fit(training)
 
-  model.write.overwrite().save("weatherModel");
+  model.write.overwrite().save("rfWeatherModel");
 
   val predictions = model.transform(test)
 

@@ -1,16 +1,12 @@
-package com.shamanthaka.scala.work
+package com.shamanthaka.scala.dt
 
-import org.apache.spark.ml.{Pipeline, PipelineModel}
-import org.apache.spark.ml.classification.RandomForestClassifier
-import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.feature.{LabeledPoint, OneHotEncoder, StringIndexer, VectorAssembler}
-import org.apache.spark.sql.{Row, SparkSession}
-import org.apache.spark.sql.functions._
+import org.apache.spark.ml.PipelineModel
+import org.apache.spark.sql.SparkSession
 
 /**
   * Created by Shamanthaka on 12/27/2017.
   */
-object RainfallPrediction extends App{
+object DTRainfallPrediction extends App{
 
 
   val sparkSession = SparkSession
@@ -37,7 +33,7 @@ object RainfallPrediction extends App{
 
   import sparkSession.implicits._
 
-  val model = PipelineModel.load("weatherModel")
+  val model = PipelineModel.load("dtWeatherModel")
 
 
   val predictions = model.transform(testData)
@@ -46,8 +42,6 @@ object RainfallPrediction extends App{
 
   val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
   predictionAndLabels.show(100)
-  //.map{case Row(label: Double, features: Vector) => LabeledPoint(label, features)}
-
 
   sparkSession.stop()
 
