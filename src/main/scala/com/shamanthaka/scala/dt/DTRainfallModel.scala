@@ -1,9 +1,9 @@
 package com.shamanthaka.scala.dt
 
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{DecisionTreeClassifier}
+import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
+import org.apache.spark.ml.feature.{IndexToString, OneHotEncoder, StringIndexer, VectorAssembler}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
@@ -44,7 +44,7 @@ object DTRainfallModel extends App{
   val logregData = logregDataAll.na.drop()
 
 
-  val rainTomorrowIndexer = new StringIndexer().setInputCol("RainTomorrow").setOutputCol("label")
+  val rainTomorrowIndexer = new StringIndexer().setInputCol("RainTomorrow").setOutputCol("label").fit(logregData)
   val rainTomorrowEncoder = new OneHotEncoder().setInputCol("label").setOutputCol("RainTomorrowVec")
 
 
@@ -66,6 +66,10 @@ object DTRainfallModel extends App{
     .setFeaturesCol("features")
     .setImpurity("gini")
     .setMaxDepth(3)
+
+  // Convert indexed labels back to original labels.
+  val labelConverter = new IndexToString()
+    .setLabels(rainTomorrowIndexer.labels)
 
   val pipeline = new Pipeline().setStages(Array(rainTomorrowIndexer, rainTomorrowEncoder,assembler,rf))
 
