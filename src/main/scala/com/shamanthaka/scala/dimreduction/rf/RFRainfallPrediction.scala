@@ -21,6 +21,7 @@ object RFRainfallPrediction extends App{
 
   val testData = sparkSession.read.format("libsvm").load("weather_libsvm_test_data.txt")
   //show schema
+  println("****** data schema will be printed ****. ")
   testData.printSchema()
 
   val colnames = testData.columns
@@ -42,13 +43,13 @@ object RFRainfallPrediction extends App{
 
 
   val predictions = model.transform(testData)
-
+  println("****** predicted data schema will be printed ****. ")
   predictions.printSchema()
 
 /*  val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
   predictionAndLabels.show(100)*/
 
-  predictions.select($"prediction", $"label",$"probability").show(100)
+  predictions.select($"prediction", $"label",$"probability").show(300)
   sparkSession.stop()
 
 }

@@ -21,6 +21,7 @@ object RFRainfallModel extends App{
 
   val data = sparkSession.read.format("libsvm").load("weather_libsvm_data.txt")
   //show schema
+  println("****** data schema will be printed ****. ")
   data.printSchema()
 
   val colnames = data.columns
@@ -41,11 +42,11 @@ object RFRainfallModel extends App{
     .setOutputCol("indexedLabel")
     .fit(data)
   // Automatically identify categorical features, and index them.
-  // Set maxCategories so features with > 4 distinct values are treated as continuous.
+  // Set maxCategories so features with > 10 distinct values are treated as continuous.
   val featureIndexer = new VectorIndexer()
     .setInputCol("features")
     .setOutputCol("indexedFeatures")
-    .setMaxCategories(4)
+    .setMaxCategories(10)
     .fit(data)
 
 
@@ -56,7 +57,7 @@ object RFRainfallModel extends App{
   // Train a RandomForest model.
   val rf = new RandomForestClassifier()
     .setLabelCol("indexedLabel")
-    .setFeaturesCol("features")
+    .setFeaturesCol("indexedFeatures")
     .setNumTrees(10)
 
   // Convert indexed labels back to original labels.
@@ -75,11 +76,11 @@ object RFRainfallModel extends App{
   model.write.overwrite().save("rfSampleModel2");
 
   val predictions = model.transform(testData)
-
+  println("****** predicted data schema will be printed ****. ")
   predictions.printSchema()
 
   // Select example rows to display.
-  predictions.select("predictedLabel", "label", "features").show(100)
+  predictions.select("prediction","label","probability", "features").show(100)
 
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()

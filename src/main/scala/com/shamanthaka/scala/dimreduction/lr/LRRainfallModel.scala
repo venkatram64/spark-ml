@@ -63,7 +63,7 @@ object LRRainfallModel extends App{
   val lr = new LogisticRegression()
     .setMaxIter(10)
     .setLabelCol("indexedLabel")
-    .setFeaturesCol("features")
+    .setFeaturesCol("indexedFeatures")
 
   // Convert indexed labels back to original labels.
   val labelConverter = new IndexToString()
@@ -85,7 +85,7 @@ object LRRainfallModel extends App{
   predictions.printSchema()
 
   // Select example rows to display.
-  predictions.select("predictedLabel", "label", "features").show(100)
+  predictions.select("prediction", "label", "features").show(100)
 
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()

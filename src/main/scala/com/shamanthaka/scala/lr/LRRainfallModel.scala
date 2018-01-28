@@ -14,6 +14,7 @@ import org.apache.spark.sql.functions._
   */
 object LRRainfallModel extends App{
 
+
   val sparkSession = SparkSession
     .builder()
     .master("local")
