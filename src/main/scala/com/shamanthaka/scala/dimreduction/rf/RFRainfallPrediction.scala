@@ -4,6 +4,7 @@ import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.{LabeledPoint, OneHotEncoder, StringIndexer, VectorAssembler}
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.functions._
 
@@ -50,6 +51,13 @@ object RFRainfallPrediction extends App{
   predictionAndLabels.show(100)*/
 
   predictions.select($"prediction", $"label",$"probability").show(300)
+
+/*  predictions.select("prediction","label","probability", "features")
+    .collect()
+    .foreach{case Row(prediction: Double, label: Double, probability: Vector, features: Vector) =>
+      println(s"($features, $label) -> prob = $probability, prediction=$prediction")
+    }*/
+
   sparkSession.stop()
 
 }

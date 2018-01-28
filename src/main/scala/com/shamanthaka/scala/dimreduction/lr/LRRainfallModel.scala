@@ -1,7 +1,7 @@
 package com.shamanthaka.scala.dimreduction.lr
 
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{LogisticRegression, RandomForestClassificationModel, RandomForestClassifier}
+import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel, RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.clustering.KMeans
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
@@ -94,6 +94,9 @@ object LRRainfallModel extends App{
     .setMetricName("accuracy")
   val accuracy = evaluator.evaluate(predictions)
   println("Test Error = " + (1.0 - accuracy))
+
+/*  val rfModel = model.stages(2).asInstanceOf[LogisticRegressionModel]
+  println("Learned classification forest model:\n" + rfModel.)*/
 
   sparkSession.stop()
 

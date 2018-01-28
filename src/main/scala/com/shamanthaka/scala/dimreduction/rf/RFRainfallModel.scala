@@ -4,8 +4,9 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.functions._
+import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /**
   * Created by Shamanthaka on 12/25/2017.
@@ -81,6 +82,12 @@ object RFRainfallModel extends App{
 
   // Select example rows to display.
   predictions.select("prediction","label","probability", "features").show(100)
+  /*import sparkSession.implicits._
+  predictions.select("prediction","label","probability", "features")
+    .collect()
+    .foreach{case Row(prediction: Double, label: Double, probability: Vector, features: Vector) =>
+        println(s"($features, $label) -> prob = $probability, prediction=$prediction")
+    }*/
 
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()
