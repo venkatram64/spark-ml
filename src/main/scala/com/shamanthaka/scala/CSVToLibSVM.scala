@@ -22,7 +22,7 @@ object CSVToLibSVM extends App{
     return result
   }
 
-  val src = Source.fromFile("weather2.csv").getLines()
+  val src = Source.fromFile("cancer2.csv").getLines()
 
   val headerLIne = src.take(1).next()
 
