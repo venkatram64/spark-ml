@@ -9,29 +9,22 @@ import scala.io.Source
   */
 object CSVToLibSVM extends App{
 
-  val sparkSession = SparkSession
-    .builder()
-    .master("local")
-    .appName("RFRainfallModel")
-    .getOrCreate()
 
   def concat(a: Array[String]):String ={
-    var result=a(0)+" "
+    var result = a(0) + " "
     for(i <- 1 to a.size.toInt - 1)
       result = result + i + ":" + a(i) + " "
     return result
   }
 
-  val src = Source.fromFile("cancer2.csv").getLines()
+  val lines = Source.fromFile("cleveland-heart-disease.csv").getLines()
 
-  val headerLIne = src.take(1).next()
+  val headerLIne = lines.take(1).next()
 
-  for (l <- src){
+  for (l <- lines){
     //println("data without comma: " + l.split(",").toList)
     println(concat(l.split(",")))
   }
 
-  /*val rfile = sparkSession.read.option("header", "false").option("inferSchema", "true").format("csv").load("weather2.csv")
-  val f=rfile.map(line => line.toString().split(",")).map(i=>concat(i))*/
 
 }
