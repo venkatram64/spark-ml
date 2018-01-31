@@ -1,25 +1,24 @@
-package com.shamanthaka.scala.dimreduction.dt
+package com.shamanthaka.scala.dimreduction.lr
 
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier, RandomForestClassificationModel, RandomForestClassifier}
+import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions._
 
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object DTRainfallModel extends App{
+object LRCancerModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RFRainfallModel")
+    .appName("LRCancerModel")
     .getOrCreate()
 
 
-  val data = sparkSession.read.format("libsvm").load("weather_libsvm_data.txt")
+  val data = sparkSession.read.format("libsvm").load("cancer_libsvm_data.txt")
   //show schema
   data.printSchema()
 
@@ -48,13 +47,13 @@ object DTRainfallModel extends App{
     .setMaxCategories(4)
     .fit(data)
 
-
-
   // Split the data into training and test sets (30% held out for testing).
   val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
-  // Train a DecisionTree model.
-  val dt = new DecisionTreeClassifier()
+  // Train a LogisticRegression model.
+
+  val lr = new LogisticRegression()
+    .setMaxIter(10)
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
 
@@ -66,19 +65,19 @@ object DTRainfallModel extends App{
 
   // Chain indexers and forest in a Pipeline.
   val pipeline = new Pipeline()
-    .setStages(Array(labelIndexer, featureIndexer, dt, labelConverter))
+    .setStages(Array(labelIndexer, featureIndexer, lr, labelConverter))
 
   // Train model. This also runs the indexers.
   val model = pipeline.fit(trainingData)
 
-  model.write.overwrite().save("dtSampleModel2");
+  model.write.overwrite().save("lrCancerModel");
 
   val predictions = model.transform(testData)
 
   predictions.printSchema()
 
   // Select example rows to display.
-  predictions.select("predictedLabel", "label", "features").show(100)
+  predictions.select("prediction", "label", "features").show(100)
 
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()
@@ -87,11 +86,11 @@ object DTRainfallModel extends App{
     .setMetricName("accuracy")
   val accuracy = evaluator.evaluate(predictions)
 
-  println("Test Accuracy = " + accuracy )
+  println("Test Accuracy = " + accuracy)
   println("Test Error = " + (1.0 - accuracy))
 
-  val dtModel = model.stages(2).asInstanceOf[DecisionTreeClassificationModel]
-  println("Learned classification forest model:\n" + dtModel.toDebugString)
+/*  val rfModel = model.stages(2).asInstanceOf[LogisticRegressionModel]
+  println("Learned classification forest model:\n" + rfModel.)*/
 
   sparkSession.stop()
 

@@ -55,11 +55,8 @@ object LRRainfallModel extends App{
   // Split the data into training and test sets (30% held out for testing).
   val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
-  // Train a RandomForest model.
- /* val rf = new RandomForestClassifier()
-    .setLabelCol("indexedLabel")
-    .setFeaturesCol("features")
-    .setNumTrees(10)*/
+  // Train a LogisticRegression model.
+
   val lr = new LogisticRegression()
     .setMaxIter(10)
     .setLabelCol("indexedLabel")
