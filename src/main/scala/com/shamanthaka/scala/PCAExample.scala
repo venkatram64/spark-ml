@@ -30,6 +30,7 @@ object PCAExample extends App{
     .fit(df)
 
   val result = pca.transform(df).select("pcaFeatures")
+  println(result.columns)
   result.show(false)
   // $example off$
 

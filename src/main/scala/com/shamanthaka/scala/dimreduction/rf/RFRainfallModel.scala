@@ -57,6 +57,7 @@ object RFRainfallModel extends App{
 
   // Train a RandomForest model.
   val rf = new RandomForestClassifier()
+    .setFeatureSubsetStrategy("auto") //  However, it's sometimes wiser to let the algorithm choose the best for the dataset we have.
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
     .setNumTrees(10)
