@@ -7,7 +7,7 @@ import org.apache.spark.sql.SparkSession
   * Created by Shamanthaka on 12/27/2017.
   */
 object LRRainfallPrediction extends App{
-  LRRainfallPrediction
+
 
   val sparkSession = SparkSession
     .builder()

@@ -1,4 +1,4 @@
-package com.shamanthaka.scala.dimreduction.lr
+package com.shamanthaka.scala.pca.lr
 
 import org.apache.spark.ml.PipelineModel
 import org.apache.spark.sql.SparkSession
@@ -6,13 +6,13 @@ import org.apache.spark.sql.SparkSession
 /**
   * Created by Shamanthaka on 12/27/2017.
   */
-object LRRainfallPrediction extends App{
+object LRPCARainfallPrediction extends App{
 
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("LRRainfallPrediction")
+    .appName("LRPCARainfallPrediction")
     .getOrCreate()
 
   val testData = sparkSession.read.format("libsvm").load("weather_libsvm_test_data.txt")
@@ -33,7 +33,7 @@ object LRRainfallPrediction extends App{
 
   import sparkSession.implicits._
 
-  val model = PipelineModel.load("lrSampleModel2")
+  val model = PipelineModel.load("lrPCARAINFALLModel")
 
 
   val predictions = model.transform(testData)
