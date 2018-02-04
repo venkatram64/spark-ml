@@ -17,7 +17,7 @@ object CSVToLibSVM extends App{
     return result
   }
 
-  val lines = Source.fromFile("cleveland-heart-disease.csv").getLines()
+  val lines = Source.fromFile("wine.csv").getLines()
 
   val headerLIne = lines.take(1).next()
 
