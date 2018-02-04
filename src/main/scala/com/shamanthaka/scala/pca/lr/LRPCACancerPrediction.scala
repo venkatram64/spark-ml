@@ -1,4 +1,4 @@
-package com.shamanthaka.scala.pca.dt
+package com.shamanthaka.scala.pca.lr
 
 import org.apache.spark.ml.PipelineModel
 import org.apache.spark.ml.linalg.Vector
@@ -7,16 +7,15 @@ import org.apache.spark.sql.{Row, SparkSession}
 /**
   * Created by Shamanthaka on 12/27/2017.
   */
-object DTPCARainfallPrediction extends App{
-
+object LRPCACancerPrediction extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("DTPCARainfallPrediction")
+    .appName("LRPCACancerPrediction")
     .getOrCreate()
 
-  val testData = sparkSession.read.format("libsvm").load("weather_libsvm_test_data.txt")
+  val testData = sparkSession.read.format("libsvm").load("cancer_libsvm_test_data.txt")
   //show schema
   testData.printSchema()
 
@@ -34,14 +33,14 @@ object DTPCARainfallPrediction extends App{
 
   import sparkSession.implicits._
 
-  val model = PipelineModel.load("dtPCARAINFALLModel")
+  val model = PipelineModel.load("lrPCACancerModel")
 
 
   val predictions = model.transform(testData)
 
   predictions.printSchema()
 
-  /*val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
+ /* val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
   predictionAndLabels.show(100)*/
 
   predictions.select("prediction","label","probability", "pcaFeatures")

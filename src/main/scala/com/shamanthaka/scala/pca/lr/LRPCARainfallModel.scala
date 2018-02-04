@@ -4,7 +4,8 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.sql.{Row, SparkSession}
 
 /**
   * Created by Shamanthaka on 12/25/2017.
@@ -44,7 +45,7 @@ object LRPCARainfallModel extends App{
   val pca = new PCA()
     .setInputCol("features")
     .setOutputCol("pcaFeatures")
-    .setK(10)
+    .setK(10)   //10 principal components are chosen
     .fit(data)
 
   // Split the data into training and test sets (30% held out for testing).
@@ -77,13 +78,21 @@ object LRPCARainfallModel extends App{
   predictions.printSchema()
 
   // Select example rows to display.
-  predictions.select("prediction", "label", "pcaFeatures").show(100)
+  //predictions.select("prediction", "label", "pcaFeatures").show(100)
+
+  import sparkSession.implicits._
+  predictions.select("prediction","label","probability","pcaFeatures")
+    .collect()
+    .foreach{case Row(prediction: Double, label: Double, probability: Vector, pcaFeatures: Vector) =>
+      println(s"($pcaFeatures, $label) -> prob = $probability, prediction=$prediction")
+    }
 
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()
     .setLabelCol("indexedLabel")
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
+
   val accuracy = evaluator.evaluate(predictions)
   println("Test Accuracy = " + accuracy * 100)
   println("Test Error = " + (1.0 - accuracy))

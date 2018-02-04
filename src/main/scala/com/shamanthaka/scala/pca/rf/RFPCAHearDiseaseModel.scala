@@ -4,22 +4,41 @@ import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{Row,SparkSession}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object RFPCARainfallModel extends App{
+
+/*Only 14 attributes used:
+1. #58 (num) (the predicted attribute)
+2. #3 (age)
+3. #4 (sex)
+4. #9 (cp)
+5. #10 (trestbps)
+6. #12 (chol)
+7. #16 (fbs)
+8. #19 (restecg)
+9. #32 (thalach)
+10. #38 (exang)
+11. #40 (oldpeak)
+12. #41 (slope)
+13. #44 (ca)
+14. #51 (thal)
+
+*/
+object RFPCAHearDiseaseModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RFPCARainfallModel")
+    .appName("RFPCAHearDiseaseModel")
     .getOrCreate()
 
 
-  val data = sparkSession.read.format("libsvm").load("weather_libsvm_data.txt")
+  val data = sparkSession.read.format("libsvm").load("cleveland_heart_disease_libsvm.txt")
+
   //show schema
   println("****** data schema will be printed ****. ")
   data.printSchema()
@@ -41,14 +60,12 @@ object RFPCARainfallModel extends App{
     .setInputCol("label")
     .setOutputCol("indexedLabel")
     .fit(data)
-  // Automatically identify categorical features, and index them.
-  // Set maxCategories so features with > 10 distinct values are treated as continuous.
 
   val pca = new PCA()
-              .setInputCol("features")
-              .setOutputCol("pcaFeatures")
-              .setK(10)  //10 principal components are chosen
-              .fit(data)
+    .setInputCol("features")
+    .setOutputCol("pcaFeatures")
+    .setK(10)  //10 principal components are chosen
+    .fit(data)
 
   // Split the data into training and test sets (30% held out for testing).
   val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
@@ -72,16 +89,17 @@ object RFPCARainfallModel extends App{
   // Train model. This also runs the indexers.
   val model = pipeline.fit(trainingData)
 
-  model.write.overwrite().save("rfPCARAINFALLModel")
+  model.write.overwrite().save("rfPCAHeatDiseaseModel");
 
   val predictions = model.transform(testData)
   println("****** predicted data schema will be printed ****. ")
   predictions.printSchema()
 
   // Select example rows to display.
-  //predictions.select("prediction","label","probability", "pcaFeatures").show(100)
+  //predictions.select("prediction","label","probability", "features").show(100)
+
   import sparkSession.implicits._
-  predictions.select("prediction","label","probability","pcaFeatures")
+  predictions.select("prediction","label","probability", "pcaFeatures")
     .collect()
     .foreach{case Row(prediction: Double, label: Double, probability: Vector, pcaFeatures: Vector) =>
         println(s"($pcaFeatures, $label) -> prob = $probability, prediction=$prediction")
@@ -92,7 +110,6 @@ object RFPCARainfallModel extends App{
     .setLabelCol("indexedLabel")
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
-
   val accuracy = evaluator.evaluate(predictions)
   println("Test Accuracy = " + accuracy * 100)
   println("Test Error = " + (1.0 - accuracy) * 100)

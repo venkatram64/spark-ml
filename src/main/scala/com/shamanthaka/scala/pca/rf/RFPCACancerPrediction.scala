@@ -1,23 +1,23 @@
-package com.shamanthaka.scala.pca.dt
+package com.shamanthaka.scala.pca.rf
 
 import org.apache.spark.ml.PipelineModel
-import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.ml.linalg.{Vector, Vectors}
 
 /**
   * Created by Shamanthaka on 12/27/2017.
   */
-object DTPCARainfallPrediction extends App{
-
+object RFPCACancerPrediction extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("DTPCARainfallPrediction")
+    .appName("RFPCACancerPrediction")
     .getOrCreate()
 
-  val testData = sparkSession.read.format("libsvm").load("weather_libsvm_test_data.txt")
+  val testData = sparkSession.read.format("libsvm").load("cancer_libsvm_test_data.txt")
   //show schema
+  println("****** data schema will be printed ****. ")
   testData.printSchema()
 
   val colnames = testData.columns
@@ -34,15 +34,16 @@ object DTPCARainfallPrediction extends App{
 
   import sparkSession.implicits._
 
-  val model = PipelineModel.load("dtPCARAINFALLModel")
-
+  val model = PipelineModel.load("rfPCACancerModel")
 
   val predictions = model.transform(testData)
-
+  println("****** predicted data schema will be printed ****. ")
   predictions.printSchema()
 
-  /*val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
+/*  val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
   predictionAndLabels.show(100)*/
+
+  //predictions.select($"prediction", $"label",$"probability").show(300)
 
   predictions.select("prediction","label","probability", "pcaFeatures")
     .collect()
