@@ -7,6 +7,7 @@ import org.apache.spark.sql.{Row, SparkSession}
 /**
   * Created by Shamanthaka on 12/27/2017.
   */
+
 object RFPCAWinePrediction extends App{
 
   val sparkSession = SparkSession
