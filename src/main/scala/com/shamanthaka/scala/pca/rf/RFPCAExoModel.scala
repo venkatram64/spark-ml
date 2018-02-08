@@ -49,7 +49,7 @@ object RFPCAExoModel extends App{
     .setInputCol("features")
     .setOutputCol("pcaFeatures")
     .setK(10)  //10 principal components are chosen
-    .fit(data)
+    //.fit(data)
 
 
   // Split the data into training and test sets (30% held out for testing).

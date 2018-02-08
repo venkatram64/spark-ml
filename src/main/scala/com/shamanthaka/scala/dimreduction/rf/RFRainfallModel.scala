@@ -57,10 +57,13 @@ object RFRainfallModel extends App{
 
   // Train a RandomForest model.
   val rf = new RandomForestClassifier()
-    .setFeatureSubsetStrategy("auto") //  However, it's sometimes wiser to let the algorithm choose the best for the dataset we have.
+    .setFeatureSubsetStrategy("auto") //  "auto", "all", "sqrt", "log2" and "on third" However, it's sometimes wiser to let the algorithm choose the best for the dataset we have.
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
+    .setImpurity("gini")
+    .setMaxBins(20)
     .setNumTrees(10)
+    .setSeed(1234)
 
   // Convert indexed labels back to original labels.
   val labelConverter = new IndexToString()
@@ -83,13 +86,13 @@ object RFRainfallModel extends App{
 
   // Select example rows to display.
   predictions.select("prediction","label","probability", "features").show(100)
-  /*import sparkSession.implicits._
-  predictions.select("prediction","label","probability", "features")
+  import sparkSession.implicits._
+  /*predictions.select("prediction","label","probability", "features")
     .collect()
     .foreach{case Row(prediction: Double, label: Double, probability: Vector, features: Vector) =>
         println(s"($features, $label) -> prob = $probability, prediction=$prediction")
-    }*/
-
+    }
+*/
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()
     .setLabelCol("indexedLabel")
