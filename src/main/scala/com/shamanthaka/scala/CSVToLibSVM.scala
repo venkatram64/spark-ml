@@ -11,7 +11,8 @@ import scala.io.Source
   */
 object CSVToLibSVM extends App{
 
-  val file = new File("exotrain_livbsvm_data.txt")
+  val file = new File("year2_libsvm_data.txt")
+
   val bw = new BufferedWriter(new FileWriter(file))
 
   def concat(a: Array[String]):String ={
@@ -23,13 +24,29 @@ object CSVToLibSVM extends App{
     return result
   }
 
-  val lines = Source.fromFile("exoTest2.csv").getLines()
+  val lines = Source.fromFile("year2.csv").getLines()
 
-  val headerLIne = lines.take(1).next()
+  //val headerLIne = lines.take(1).next()
+
 
   for (l <- lines){
     //println("data without comma: " + l.split(",").toList)
-    println(concat(l.split(",")))
+    var flag = false;
+    val splitedLine = l.split(",")
+
+    splitedLine.map(sl => {
+      //println(sl)
+      if(sl == "?") {
+        println(sl)
+        flag = true
+      }
+    })
+
+    //println(splitedLine)
+    if(!flag) {
+      println(concat(splitedLine))
+    }
+
   }
   bw.close()
 
