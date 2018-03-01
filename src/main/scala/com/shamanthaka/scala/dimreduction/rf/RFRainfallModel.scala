@@ -57,7 +57,7 @@ object RFRainfallModel extends App{
 
   // Train a RandomForest model.
   val rf = new RandomForestClassifier()
-    .setFeatureSubsetStrategy("auto") //  "auto", "all", "sqrt", "log2" and "on third" However, it's sometimes wiser to let the algorithm choose the best for the dataset we have.
+    .setFeatureSubsetStrategy("sqrt") //  "auto", "all", "sqrt", "log2" and "on third" However, it's sometimes wiser to let the algorithm choose the best for the dataset we have.
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
     .setImpurity("gini")
@@ -99,6 +99,8 @@ object RFRainfallModel extends App{
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
   val accuracy = evaluator.evaluate(predictions)
+
+  println("Test Accuracy = " + accuracy)
   println("Test Error = " + (1.0 - accuracy))
 
   val rfModel = model.stages(2).asInstanceOf[RandomForestClassificationModel]

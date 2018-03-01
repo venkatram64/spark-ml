@@ -111,6 +111,7 @@ object RFHearDiseaseModel extends App{
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
   val accuracy = evaluator.evaluate(predictions)
+
   println("Test Accuracy = " + accuracy)
   println("Test Error = " + (1.0 - accuracy))
 

@@ -90,6 +90,8 @@ object LRRainfallModel extends App{
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
   val accuracy = evaluator.evaluate(predictions)
+
+  println("Test Accuracy = " + accuracy)
   println("Test Error = " + (1.0 - accuracy))
 
 /*  val rfModel = model.stages(2).asInstanceOf[LogisticRegressionModel]
