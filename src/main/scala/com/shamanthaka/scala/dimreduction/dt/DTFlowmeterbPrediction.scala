@@ -6,16 +6,16 @@ import org.apache.spark.sql.SparkSession
 /**
   * Created by Shamanthaka on 12/27/2017.
   */
-object DTFlowmeteraPrediction extends App{
+object DTFlowmeterbPrediction extends App{
 
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("DTFlowmeteraPrediction")
+    .appName("DTFlowmeterbPrediction")
     .getOrCreate()
 
-  val testData = sparkSession.read.format("libsvm").load("flowmetera_libsvm_data")
+  val testData = sparkSession.read.format("libsvm").load("flowmeterb_libsvm_data")
   //show schema
   testData.printSchema()
 
@@ -33,7 +33,7 @@ object DTFlowmeteraPrediction extends App{
 
   import sparkSession.implicits._
 
-  val model = PipelineModel.load("dtFlowmeteraModel")
+  val model = PipelineModel.load("dtFlowmeterbModel")
 
 
   val predictions = model.transform(testData)
