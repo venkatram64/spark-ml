@@ -1,7 +1,8 @@
-package com.shamanthaka.scala.dimreduction.lr
+package com.shamanthaka.scala.dimreduction.dt
 
+import com.shamanthaka.scala.dimreduction.dt.DTRainfallModel.model
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier, LogisticRegression}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.SparkSession
@@ -9,17 +10,34 @@ import org.apache.spark.sql.SparkSession
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object LRHearDiseaseModel extends App{
+
+/*
+1) Alcohol
+ 	2) Malic acid
+ 	3) Ash
+	4) Alcalinity of ash
+ 	5) Magnesium
+	6) Total phenols
+ 	7) Flavanoids
+ 	8) Nonflavanoid phenols
+ 	9) Proanthocyanins
+	10)Color intensity
+ 	11)Hue
+ 	12)OD280/OD315 of diluted wines
+ 	13)Proline
+ */
+object DTWineModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("LRHearDiseaseModel")
+    .appName("DTWineModel")
     .getOrCreate()
 
 
-  val data = sparkSession.read.format("libsvm").load("cleveland_heart_disease_libsvm.txt")
+  val data = sparkSession.read.format("libsvm").load("wine_libsvm_data.txt")
   //show schema
+  println("****** data schema will be printed ****. ")
   data.printSchema()
 
   val colnames = data.columns
@@ -40,20 +58,18 @@ object LRHearDiseaseModel extends App{
     .setOutputCol("indexedLabel")
     .fit(data)
   // Automatically identify categorical features, and index them.
-  // Set maxCategories so features with > 4 distinct values are treated as continuous.
+  // Set maxCategories so features with > 10 distinct values are treated as continuous.
   val featureIndexer = new VectorIndexer()
     .setInputCol("features")
     .setOutputCol("indexedFeatures")
-    .setMaxCategories(4)
+    .setMaxCategories(10)
     .fit(data)
+
 
   // Split the data into training and test sets (30% held out for testing).
   val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
-  // Train a LogisticRegression model.
-
-  val lr = new LogisticRegression()
-    .setMaxIter(10)
+  val dt = new DecisionTreeClassifier()
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
 
@@ -65,32 +81,38 @@ object LRHearDiseaseModel extends App{
 
   // Chain indexers and forest in a Pipeline.
   val pipeline = new Pipeline()
-    .setStages(Array(labelIndexer, featureIndexer, lr, labelConverter))
+    .setStages(Array(labelIndexer, featureIndexer, dt, labelConverter))
 
   // Train model. This also runs the indexers.
   val model = pipeline.fit(trainingData)
 
-  model.write.overwrite().save("lrHeatDiseaseModel");
+  model.write.overwrite().save("dtWineModel");
 
   val predictions = model.transform(testData)
-
+  println("****** predicted data schema will be printed ****. ")
   predictions.printSchema()
 
   // Select example rows to display.
-  predictions.select("prediction", "label", "features").show(100)
+  predictions.select("prediction","label","probability", "features").show(100)
+  /*predictions.select("prediction","label","probability", "features")
+    .collect()
+    .foreach{case Row(prediction: Double, label: Double, probability: Vector, features: Vector) =>
+        println(s"($pcaFeatures, $label) -> prob = $probability, prediction=$prediction")
+    }*/
 
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()
     .setLabelCol("indexedLabel")
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
+
   val accuracy = evaluator.evaluate(predictions)
 
-  println("Test Accuracy = " + accuracy)
-  println("Test Error = " + (1.0 - accuracy))
+  println("Test Accuracy = " + accuracy * 100)
+  println("Test Error = " + (1.0 - accuracy) * 100)
 
-/*  val rfModel = model.stages(2).asInstanceOf[LogisticRegressionModel]
-  println("Learned classification forest model:\n" + rfModel.)*/
+  val dtModel = model.stages(2).asInstanceOf[DecisionTreeClassificationModel]
+  println("Learned classification forest model:\n" + dtModel.toDebugString)
 
   sparkSession.stop()
 

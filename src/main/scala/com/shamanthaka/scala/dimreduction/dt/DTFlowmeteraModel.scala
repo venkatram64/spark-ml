@@ -1,7 +1,7 @@
-package com.shamanthaka.scala.dimreduction.rf
+package com.shamanthaka.scala.dimreduction.dt
 
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
+import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.SparkSession
@@ -9,18 +9,17 @@ import org.apache.spark.sql.SparkSession
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object RFCancerModel extends App{
+object DTFlowmeteraModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RFCancerlModel")
+    .appName("DTFlowmeteraModel")
     .getOrCreate()
 
 
-  val data = sparkSession.read.format("libsvm").load("cancer_libsvm_data.txt")
+  val data = sparkSession.read.format("libsvm").load("flowmetera_libsvm_data")
   //show schema
-  println("****** data schema will be printed ****. ")
   data.printSchema()
 
   val colnames = data.columns
@@ -41,11 +40,11 @@ object RFCancerModel extends App{
     .setOutputCol("indexedLabel")
     .fit(data)
   // Automatically identify categorical features, and index them.
-  // Set maxCategories so features with > 10 distinct values are treated as continuous.
+  // Set maxCategories so features with > 4 distinct values are treated as continuous.
   val featureIndexer = new VectorIndexer()
     .setInputCol("features")
     .setOutputCol("indexedFeatures")
-    .setMaxCategories(10)
+    .setMaxCategories(4)
     .fit(data)
 
 
@@ -53,11 +52,10 @@ object RFCancerModel extends App{
   // Split the data into training and test sets (30% held out for testing).
   val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
-  // Train a RandomForest model.
-  val rf = new RandomForestClassifier()
+  // Train a DecisionTree model.
+  val dt = new DecisionTreeClassifier()
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
-    .setNumTrees(10)
 
   // Convert indexed labels back to original labels.
   val labelConverter = new IndexToString()
@@ -67,25 +65,19 @@ object RFCancerModel extends App{
 
   // Chain indexers and forest in a Pipeline.
   val pipeline = new Pipeline()
-    .setStages(Array(labelIndexer, featureIndexer, rf, labelConverter))
+    .setStages(Array(labelIndexer, featureIndexer, dt, labelConverter))
 
   // Train model. This also runs the indexers.
   val model = pipeline.fit(trainingData)
 
-  model.write.overwrite().save("rfCancerModel");
+  model.write.overwrite().save("dtFlowmeteraModel");
 
   val predictions = model.transform(testData)
-  println("****** predicted data schema will be printed ****. ")
+
   predictions.printSchema()
 
   // Select example rows to display.
-  predictions.select("prediction","label","probability", "features").show(100)
-  /*import sparkSession.implicits._
-  predictions.select("prediction","label","probability", "features")
-    .collect()
-    .foreach{case Row(prediction: Double, label: Double, probability: Vector, features: Vector) =>
-        println(s"($features, $label) -> prob = $probability, prediction=$prediction")
-    }*/
+  predictions.select("predictedLabel", "label", "probability", "features").show(300)
 
   // Select (prediction, true label) and compute test error.
   val evaluator = new MulticlassClassificationEvaluator()
@@ -97,8 +89,8 @@ object RFCancerModel extends App{
   println("Test Accuracy = " + accuracy * 100)
   println("Test Error = " + (1.0 - accuracy) * 100)
 
-  val rfModel = model.stages(2).asInstanceOf[RandomForestClassificationModel]
-  println("Learned classification forest model:\n" + rfModel.toDebugString)
+  val dtModel = model.stages(2).asInstanceOf[DecisionTreeClassificationModel]
+  println("Learned classification forest model:\n" + dtModel.toDebugString)
 
   sparkSession.stop()
 

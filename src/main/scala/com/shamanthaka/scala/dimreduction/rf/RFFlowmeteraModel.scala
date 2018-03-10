@@ -9,16 +9,16 @@ import org.apache.spark.sql.SparkSession
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object RFCancerModel extends App{
+object RFFlowmeteraModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RFCancerlModel")
+    .appName("RFFlowmeteraModel")
     .getOrCreate()
 
 
-  val data = sparkSession.read.format("libsvm").load("cancer_libsvm_data.txt")
+  val data = sparkSession.read.format("libsvm").load("flowmetera_libsvm_data")
   //show schema
   println("****** data schema will be printed ****. ")
   data.printSchema()
@@ -72,7 +72,7 @@ object RFCancerModel extends App{
   // Train model. This also runs the indexers.
   val model = pipeline.fit(trainingData)
 
-  model.write.overwrite().save("rfCancerModel");
+  model.write.overwrite().save("rfFlowmeterModel");
 
   val predictions = model.transform(testData)
   println("****** predicted data schema will be printed ****. ")
@@ -93,7 +93,6 @@ object RFCancerModel extends App{
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
   val accuracy = evaluator.evaluate(predictions)
-
   println("Test Accuracy = " + accuracy * 100)
   println("Test Error = " + (1.0 - accuracy) * 100)
 

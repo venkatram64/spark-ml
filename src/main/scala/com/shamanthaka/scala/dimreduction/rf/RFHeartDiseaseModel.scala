@@ -9,16 +9,35 @@ import org.apache.spark.sql.SparkSession
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object RFCancerModel extends App{
+
+/*Only 14 attributes used:
+1. #58 (num) (the predicted attribute)
+2. #3 (age)
+3. #4 (sex)
+4. #9 (cp)
+5. #10 (trestbps)
+6. #12 (chol)
+7. #16 (fbs)
+8. #19 (restecg)
+9. #32 (thalach)
+10. #38 (exang)
+11. #40 (oldpeak)
+12. #41 (slope)
+13. #44 (ca)
+14. #51 (thal)
+
+*/
+object RFHeartDiseaseModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RFCancerlModel")
+    .appName("RFHeartDiseaseModel")
     .getOrCreate()
 
 
-  val data = sparkSession.read.format("libsvm").load("cancer_libsvm_data.txt")
+  val data = sparkSession.read.format("libsvm").load("cleveland_heart_disease_libsvm.txt")
+
   //show schema
   println("****** data schema will be printed ****. ")
   data.printSchema()
@@ -48,13 +67,12 @@ object RFCancerModel extends App{
     .setMaxCategories(10)
     .fit(data)
 
-
-
   // Split the data into training and test sets (30% held out for testing).
   val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
   // Train a RandomForest model.
   val rf = new RandomForestClassifier()
+    .setFeatureSubsetStrategy("auto") //  However, it's sometimes wiser to let the algorithm choose the best for the dataset we have.
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
     .setNumTrees(10)
@@ -72,7 +90,7 @@ object RFCancerModel extends App{
   // Train model. This also runs the indexers.
   val model = pipeline.fit(trainingData)
 
-  model.write.overwrite().save("rfCancerModel");
+  model.write.overwrite().save("rfHeatDiseaseModel");
 
   val predictions = model.transform(testData)
   println("****** predicted data schema will be printed ****. ")

@@ -1,20 +1,24 @@
 package com.shamanthaka.scala.dimreduction.rf
 
+
 import org.apache.spark.ml.PipelineModel
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.functions._
 
 /**
   * Created by Shamanthaka on 12/27/2017.
   */
-object RFFlowmeterPrediction extends App{
+
+object RFWinePrediction extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RFCancerPrediction")
+    .appName("RFWinePrediction")
     .getOrCreate()
 
-  val testData = sparkSession.read.format("libsvm").load("flowmetera_libsvm_data")
+  val testData = sparkSession.read.format("libsvm").load("wine_libsvm_test_data.txt")
   //show schema
   println("****** data schema will be printed ****. ")
   testData.printSchema()
@@ -30,12 +34,7 @@ object RFFlowmeterPrediction extends App{
     println("\n")
   }
 
-
-  import sparkSession.implicits._
-
-  val model = PipelineModel.load("rfFlowmeterModel")
-
-
+  val model = PipelineModel.load("rfWineModel")
 
   val predictions = model.transform(testData)
   println("****** predicted data schema will be printed ****. ")
@@ -43,10 +42,11 @@ object RFFlowmeterPrediction extends App{
 
 /*  val predictionAndLabels = predictions.select($"prediction", $"label",$"probability")
   predictionAndLabels.show(100)*/
+  import sparkSession.implicits._
 
   predictions.select($"prediction", $"label",$"probability").show(300)
 
-/*  predictions.select("prediction","label","probability", "features")
+  /*predictions.select("prediction","label","probability", "features")
     .collect()
     .foreach{case Row(prediction: Double, label: Double, probability: Vector, features: Vector) =>
       println(s"($features, $label) -> prob = $probability, prediction=$prediction")

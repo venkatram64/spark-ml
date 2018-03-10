@@ -86,8 +86,8 @@ object DTCancerModel extends App{
     .setMetricName("accuracy")
   val accuracy = evaluator.evaluate(predictions)
 
-  println("Test Accuracy = " + accuracy)
-  println("Test Error = " + (1.0 - accuracy))
+  println("Test Accuracy = " + accuracy * 100)
+  println("Test Error = " + (1.0 - accuracy) * 100)
 
   val dtModel = model.stages(2).asInstanceOf[DecisionTreeClassificationModel]
   println("Learned classification forest model:\n" + dtModel.toDebugString)

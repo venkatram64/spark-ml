@@ -1,24 +1,42 @@
 package com.shamanthaka.scala.dimreduction.rf
 
+import com.shamanthaka.scala.dimreduction.rf.RFRainfallModel.data
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature._
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.sql.{Row, SparkSession}
 
 /**
   * Created by Shamanthaka on 12/25/2017.
   */
-object RFCancerModel extends App{
+
+/*
+1) Alcohol
+ 	2) Malic acid
+ 	3) Ash
+	4) Alcalinity of ash
+ 	5) Magnesium
+	6) Total phenols
+ 	7) Flavanoids
+ 	8) Nonflavanoid phenols
+ 	9) Proanthocyanins
+	10)Color intensity
+ 	11)Hue
+ 	12)OD280/OD315 of diluted wines
+ 	13)Proline
+ */
+object RFWineModel extends App{
 
   val sparkSession = SparkSession
     .builder()
     .master("local")
-    .appName("RFCancerlModel")
+    .appName("RFWineModel")
     .getOrCreate()
 
 
-  val data = sparkSession.read.format("libsvm").load("cancer_libsvm_data.txt")
+  val data = sparkSession.read.format("libsvm").load("wine_libsvm_data.txt")
   //show schema
   println("****** data schema will be printed ****. ")
   data.printSchema()
@@ -49,7 +67,6 @@ object RFCancerModel extends App{
     .fit(data)
 
 
-
   // Split the data into training and test sets (30% held out for testing).
   val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
@@ -57,7 +74,7 @@ object RFCancerModel extends App{
   val rf = new RandomForestClassifier()
     .setLabelCol("indexedLabel")
     .setFeaturesCol("indexedFeatures")
-    .setNumTrees(10)
+    .setNumTrees(5)
 
   // Convert indexed labels back to original labels.
   val labelConverter = new IndexToString()
@@ -72,7 +89,7 @@ object RFCancerModel extends App{
   // Train model. This also runs the indexers.
   val model = pipeline.fit(trainingData)
 
-  model.write.overwrite().save("rfCancerModel");
+  model.write.overwrite().save("rfWineModel");
 
   val predictions = model.transform(testData)
   println("****** predicted data schema will be printed ****. ")
@@ -80,8 +97,7 @@ object RFCancerModel extends App{
 
   // Select example rows to display.
   predictions.select("prediction","label","probability", "features").show(100)
-  /*import sparkSession.implicits._
-  predictions.select("prediction","label","probability", "features")
+  /*predictions.select("prediction","label","probability", "features")
     .collect()
     .foreach{case Row(prediction: Double, label: Double, probability: Vector, features: Vector) =>
         println(s"($features, $label) -> prob = $probability, prediction=$prediction")
@@ -92,6 +108,7 @@ object RFCancerModel extends App{
     .setLabelCol("indexedLabel")
     .setPredictionCol("prediction")
     .setMetricName("accuracy")
+
   val accuracy = evaluator.evaluate(predictions)
 
   println("Test Accuracy = " + accuracy * 100)
