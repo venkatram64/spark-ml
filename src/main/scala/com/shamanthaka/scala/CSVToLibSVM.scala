@@ -11,7 +11,7 @@ import scala.io.Source
   */
 object CSVToLibSVM extends App{
 
-  val file = new File("dermatology_libsvm_data.txt")
+  val file = new File("lungcancer_libsvm_data.txt")
 
   val bw = new BufferedWriter(new FileWriter(file))
 
@@ -24,7 +24,7 @@ object CSVToLibSVM extends App{
     return result
   }
 
-  val lines = Source.fromFile("dermatology.csv").getLines()
+  val lines = Source.fromFile("lungcancer.csv").getLines()
 
   //val headerLIne = lines.take(1).next()
 
