@@ -1,0 +1,151 @@
+************************************************
+
+
+1. java -version
+2. sudo apt-get update
+3. sudo apt-get install default-jre
+4. java -version
+
+5. sudo addgroup hadoop
+6. sudo adduser --ingroup hadoop hduser
+7. adding hduser to sudo list
+sudo adduser hduser sudo
+
+8. sudo apt-get install openssh-server
+
+9. su - hduser
+
+10. cd -> going to /home/hduser
+
+11. ssh-keygen -t rsa -P ""
+
+12. cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
+
+13. try to login, to check above is working
+ssh localhost
+
+14. exit   (from above)
+
+
+above is the user setting's done,
+
+
+15. download the hadoop
+
+16. copy downloaded hadoop to Desktop
+
+17. tar -xvzf hadoop-2.9.1.tar.tar.gz
+
+18. sudo mv hadoop-2.9.1 /usr/local/hadoop
+
+change the ownership
+19. sudo chown -R hduser /usr/local
+
+20. sudo nano ~/.bashrc
+
+copy below lines
+
+
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME=/usr/local/hadoop
+export PATH=$PATH:$HADOOP_HOME/bin
+export PATH=$PATH:$HADOOP_HOME/sbin
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib"
+
+21. source ~/.bashrc
+
+
+22) sudo gedit /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+23)sudo gedit /usr/local/hadoop/etc/hadoop/core-site.xml
+
+<property>
+  <name>fs.default.name</name>
+  <value>hdfs://localhost:9000</value>
+</property>
+
+24)sudo gedit /usr/local/hadoop/etc/hadoop/hdfs-site.xml
+
+<property>
+  <name>dfs.replication</name>
+  <value>1</value>
+</property>
+<property>
+  <name>dfs.namenode.name.dir</name>
+  <value>file:/usr/local/hadoop_tmp/hdfs/namenode</value>
+</property>
+<property>
+ <name>dfs.datanode.data.dir</name>
+ <value>file:/usr/local/hadoop_tmp/hdfs/datanode</value>
+</property>
+
+
+25)sudo gedit /usr/local/hadoop/etc/hadoop/yarn-site.xml
+
+<property>
+  <name>yarn.nodemanager.aux-services</name>
+  <value>mapreduce_shuffle</value>
+</property>
+<property>
+  <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+  <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+</property>
+
+
+26)
+sudo cp  /usr/local/hadoop/etc/hadoop/mapred-site.xml.template /usr/local/hadoop/etc/hadoop/mapred-site.xml
+sudo gedit /usr/local/hadoop/etc/hadoop/mapred-site.xml
+
+<property>
+  <name>mapreduce.framework.name</name>
+  <value>yarn</value>
+</property>
+
+
+27. sudo mkdir -p /usr/local/hadoop_tmp
+
+28. sudo mkdir -p /usr/local/hadoop_tmp/hdfs/namenode
+
+29. sudo mkdir -p /usr/local/hadoop_tmp/hdfs/datanode
+
+30. sudo chown -R hduser /usr/local/hadoop_tmp
+
+31. hdfs namenode -format
+
+32. start-dfs.sh
+
+33. start-yarn.sh
+
+24. jps
+
+to workabove command
+25. sudo pat install openjdk-11-jdk-headless
+
+26. hduser@venkatram-VirtualBox:~$ cd /home/venkatram/Desktop
+
+27 create data dir
+sudo mkdir data
+
+28.  cd /usr/local/hadoop
+
+29. bin/hdfs dfs -mkdir /user
+
+30. bin/hdfs dfs -mkdir /user/ypm
+
+31. bin/hdfs dfs -put /home/venkatram/Desktop/data /user/input
+
+32. bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.9.1.jar wordcount /user/input output
+
+33. bin/hdfs dfs -cat output/*
+
+34. http://localhost:50070
+
+
+
